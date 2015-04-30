@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="UTF-8">
+	<title>Markdown Editor</title>
+	<style type="text/css" media="screen">
+		.header {
+			font-size: x-large;
+			font-weight: bolder;
+			color:#ffffff;
+			background-color:#ccccff;
+			border-bottom: 1px solid rgba(0,0,0,1);
+		}
+		#editor {
+			border-right: 1px solid rgba(0,0,0,1);
+			margin: 0;
+			position: relative;
+			height: 600px;
+			width: 45%;
+			float: left;
+		}
+		#viewer {
+			width: 45%;
+			height: 600px;
+			overflow: auto;
+		}
+	</style>
+</head>
+<body>
+<div class="header">Markdown editor</div>
+<pre id="editor"># Marked in browser
+
+- Edited by **ACE** 
+- Rendered by **marked**
+</pre>
+<div id="viewer" />
+
+<script src="js/require.js" ></script>
+<script>
+require.config({
+	baseUrl: "lib",
+	paths: {ace: "ace"}
+});
+
+define('mdliveedit', ['ace/ace','marked'],
+	function(ace, marked,langtools) {
+		var editor = ace.edit("editor");
+		editor.session.setMode("ace/mode/markdown");
+
+		marked.setOptions({
+			renderer: new marked.Renderer(),
+			gfm: true,
+			tables: true,
+			breaks: false,
+			pedantic: false,
+			sanitize: true,
+			smartLists: true,
+			smartypants: false
+		});
+
+		var viewer=document.getElementById('viewer');
+		viewer.innerHTML = marked(editor.getValue());
+		editor.getSession().on("change" , function(e){
+			viewer.innerHTML = marked(editor.getValue());
+		});
+
+		editor.getSession().on('changeScrollTop',function(scroll){
+			var cursor = editor.selection.getCursor();
+			var rows = editor.session.getLength();
+			viewer.scrollTop= (viewer.scrollHeight-viewer.clientHeight)*cursor.row/rows;
+		});
+	}
+);
+require(['mdliveedit'])
+</script>
+</body>
+</html>
